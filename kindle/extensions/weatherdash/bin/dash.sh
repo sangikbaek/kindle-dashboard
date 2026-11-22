@@ -21,8 +21,10 @@ cleanup() {
   log "stopped"
   if [ "$STOP_GUI" = "1" ]; then
     eips -c
-    eips 10 35 "Restarting Kindle UI..."
-    start lab126_gui
+    # 일시정지했던 킨들 UI(cvm) 재개 → 홈 화면으로 다시 그리기
+    killall -CONT cvm 2>/dev/null
+    sleep 1
+    lipc-set-prop com.lab126.appmgrd start app://com.lab126.booklet.home 2>/dev/null
   fi
   exit 0
 }
@@ -64,8 +66,8 @@ log "start (url=$URL interval=$INTERVAL stop_gui=$STOP_GUI)"
 lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
 if [ "$STOP_GUI" = "1" ]; then
-  stop lab126_gui
-  sleep 3
+  sleep 2                     # KUAL 메뉴가 닫힐 시간
+  killall -STOP cvm           # 킨들 UI 일시정지 (종료하지 않으므로 복귀가 빠름)
   eips -c
   eips 10 35 "Weather dashboard loading..."
 fi
@@ -95,7 +97,7 @@ while true; do
   n=0
   while [ $n -lt "$wait_sec" ]; do
     [ -f "$STOPF" ] && cleanup
-    sleep 2
-    n=$((n + 2))
+    sleep 1
+    n=$((n + 1))
   done
 done
