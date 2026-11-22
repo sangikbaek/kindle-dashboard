@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "name": "Weather Dashboard",
+      "priority": -5,
+      "items": [
+        { "name": "Start", "priority": 1, "action": "/bin/sh", "params": "/mnt/us/extensions/weatherdash/bin/start.sh", "exitmenu": true },
+        { "name": "Stop", "priority": 2, "action": "/bin/sh", "params": "/mnt/us/extensions/weatherdash/bin/stop.sh" },
+        { "name": "Show log", "priority": 3, "action": "/bin/sh", "params": "/mnt/us/extensions/weatherdash/bin/showlog.sh" }
+      ]
+    }
+  ]
+}

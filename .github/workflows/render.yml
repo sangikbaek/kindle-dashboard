@@ -1,0 +1,43 @@
+name: render dashboard
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # 15분마다 (GitHub 사정에 따라 몇 분씩 늦어질 수 있음)
+  workflow_dispatch:          # Actions 탭에서 수동 실행
+
+permissions:
+  contents: write
+
+concurrency:
+  group: render
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install font and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-nanum
+          pip install -q pillow==10.4.0
+
+      - name: Render
+        run: python dashboard.py out/dashboard.png
+
+      # 'output' 브랜치에 이미지 1개만 남도록 매번 덮어쓰기 (기록이 쌓이지 않음)
+      - name: Publish to output branch
+        run: |
+          cd out
+          git init -q -b output
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard.png
+          git commit -q -m "update $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" output
